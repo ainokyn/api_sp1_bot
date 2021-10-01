@@ -23,23 +23,32 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 URL = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 bot = Bot(token=TELEGRAM_TOKEN)
+good_status = {'reviewing': 'Твоя работа взята на ревью.',
+               'rejected': 'К сожалению, в работе нашлись ошибки.',
+               'approved': 'Ревьюеру всё понравилось, работа зачтена!'}
+bad_status = {None: 'Объект отсутствует',
+              " ": 'Объект пустая строка'}
 
 
 def parse_homework_status(homework):
     """This function gets the project name and the status of the work."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
-    if homework_name is None and homework_status is None:
-        logger.error('Отсутствует имя или статус работы.')
-    if homework_status == 'rejected':
-        verdict = 'К сожалению, в работе нашлись ошибки.'
-    elif homework_status == 'reviewing':
-        verdict = 'Твоя работа взята на ревью.'
-    elif homework_status == 'approved':
-        verdict = 'Ревьюеру всё понравилось, работа зачтена!'
-    else:
-        logger.error('Неизвестный статус работы.')
-    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+    if homework_status in good_status:
+        verdict = good_status[homework_status]
+        return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+    if homework_status not in good_status:
+        if homework_status in bad_status:
+            logger.error('Проблема со статусом работы.')
+            error = bad_status[homework_status]
+            return f'У вас ошибка "{error}"!'
+        else:
+            logger.error('Неизвестная ошибка статуса работы.')
+            return 'Неизвестная ошибка статуса работы.'
+    if homework_name in bad_status:
+        logger.error('Проблема с именем работы.')
+        error = bad_status[homework_name]
+        return f'У вас ошибка "{error}"!'
 
 
 def get_homeworks(current_timestamp):
@@ -50,6 +59,7 @@ def get_homeworks(current_timestamp):
         homework_statuses = requests.get(URL, headers=headers, params=payload)
     except requests.RequestException as e:
         logger.error(f'Возникла проблема с запросом: {e}')
+        return []
     return homework_statuses.json()
 
 
@@ -72,7 +82,7 @@ def main():
             if homework.get('homeworks'):
                 send_message(message=parse_homework_status(
                     homework.get('homeworks')[0]))
-                current_timestamp = homework.get('current status')
+                current_timestamp = homework.get('current_date')
                 time.sleep(5 * 60)
         except Exception as e:
             logger.error(e)
