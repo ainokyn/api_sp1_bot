@@ -83,7 +83,7 @@ def main():
                 send_message(message=parse_homework_status(
                     homework.get('homeworks')[0]))
                 current_timestamp = homework.get('current_date')
-                time.sleep(60 * 60)
+                time.sleep(20 * 60)
         except Exception as e:
             logger.error(e)
             bot.send_message(text=f'Бот упал с ошибкой: {e}', chat_id=CHAT_ID)
