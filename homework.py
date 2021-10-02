@@ -59,7 +59,7 @@ def get_homeworks(current_timestamp):
         homework_statuses = requests.get(URL, headers=headers, params=payload)
     except requests.RequestException as e:
         logger.error(f'Возникла проблема с запросом: {e}')
-        return []
+        return {}
     return homework_statuses.json()
 
 
