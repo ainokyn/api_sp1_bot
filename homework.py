@@ -41,6 +41,7 @@ def parse_homework_status(homework):
         if homework_status in bad_status:
             logger.error('Проблема со статусом работы.')
             error = bad_status[homework_status]
+            bot.send_message(text=f'Бот упал с ошибкой: {error}', chat_id=CHAT_ID)
             return f'У вас ошибка "{error}"!'
         else:
             logger.error('Неизвестная ошибка статуса работы.')
@@ -48,6 +49,7 @@ def parse_homework_status(homework):
     if homework_name in bad_status:
         logger.error('Проблема с именем работы.')
         error = bad_status[homework_name]
+        bot.send_message(text=f'Бот упал с ошибкой: {error}', chat_id=CHAT_ID)
         return f'У вас ошибка "{error}"!'
 
 
@@ -57,6 +59,7 @@ def get_homeworks(current_timestamp):
     payload = {'from_date': current_timestamp}
     try:
         homework_statuses = requests.get(URL, headers=headers, params=payload)
+        bot.send_message(text=f'Статус работы: {homework_statuses.text}', chat_id=CHAT_ID)
     except requests.RequestException as e:
         logger.error(f'Возникла проблема с запросом: {e}')
         return {}
@@ -70,6 +73,7 @@ def send_message(message):
         return bot.send_message(chat_id=CHAT_ID, text=message)
     except BadRequest as e:
         logger.error(f'Проблема с chat_id: {e}')
+        bot.send_message(text=f'Бот упал с ошибкой: {e}', chat_id=CHAT_ID)
 
 
 def main():
